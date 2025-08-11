@@ -1,0 +1,7 @@
+recman.env
+.idea
+db-data
+docker/nginx/logs
+src/vendor
+src/templates_c
+src/composer.lock

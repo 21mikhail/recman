@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  nginx:
+    container_name: recman-nginx
+    build:
+      context: ./docker/nginx
+      dockerfile: .Dockerfile
+    restart: always
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/logs:/var/log/nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - recman
+
+  php-fpm:
+    container_name: recman-php-fpm
+    build:
+      context: ./docker/php
+      dockerfile: .Dockerfile
+    env_file:
+      - recman.env
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+    depends_on:
+      - nginx
+      - db
+    networks:
+      - recman
+
+  db:
+    container_name: recman-mariadb
+    image: mariadb:10.6
+    restart: always
+    env_file:
+      - recman.env
+    volumes:
+      - ./db-data:/var/lib/mysql
+    networks:
+      - recman
+    ports:
+      - '3306:3306'
+
+networks:
+  recman:
+    driver: bridge
+
+
